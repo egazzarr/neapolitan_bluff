@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finesse Card Battle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-image: url('bck.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+
+        .game-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title h1 {
+            font-size: 3em;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
+            margin-bottom: 10px;
+        }
+
+        .title p {
+            font-size: 1.2em;
+            color: #FFF;
+        }
+
+        .story-intro {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 20px;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 30px rgba(255,215,0,0.3);
+        }
+
+        .story-text {
+            text-align: left;
+            line-height: 1.8;
+        }
+
+        .story-text p {
+            font-size: 1.1em;
+            color: #FFF;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            font-style: italic;
+        }
+
+        .story-text p:last-child {
+            margin-bottom: 0;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        .character-selection {
+            display: block;
+            text-align: center;
+        }
+
+        .player-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 15px;
+            border: 3px solid #FFD700;
+        }
+
+        .player-section h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #FFD700;
+        }
+
+        .character-options {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .character-card {
+            width: 150px;
+            height: 200px;
+            border: 3px solid #ccc;
+            border-radius: 15px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .character-card:hover {
+            transform: scale(1.05);
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255,215,0,0.6);
+        }
+
+        .character-card.selected {
+            border-color: #FFD700;
+            background: rgba(255,215,0,0.2);
+            box-shadow: 0 0 30px rgba(255,215,0,0.8);
+        }
+
+        .character-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .character-card .name {
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            background: rgba(0,0,0,0.7);
+            text-transform: capitalize;
+        }
+
+        .start-game-btn {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .start-game-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,215,0,0.8);
+        }
+
+        /* NEW GAME SCREEN STYLES */
+        .game-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('bck.jpg');
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .hud {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px 30px;
+            border-radius: 15px;
+            border: 2px solid #FFD700;
+            z-index: 100;
+        }
+
+        .score-display {
+            text-align: center;
+        }
+
+        .score-display h3 {
+            color: #FFD700;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .score-display .score-value {
+            color: #FFF;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .turn-indicator {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            padding: 20px 40px;
+            border-radius: 15px;
+            border: 3px solid #FFD700;
+            z-index: 100;
+            text-align: center;
+        }
+
+        .turn-indicator h2 {
+            color: #FFD700;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .turn-indicator p {
+            color: #FFF;
+            font-size: 1.1em;
+        }
+
+        .action-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .suit-button {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #FFD700;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.8);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .suit-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255,215,0,0.8);
+        }
+
+        .suit-button img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .falling-suit {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            z-index: 50;
+        }
+
+        .falling-suit img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #FFD700;
+        }
+
+        .falling-suit:hover {
+            transform: scale(1.2);
+        }
+
+        .character-hint {
+            position: fixed;
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #FFD700;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .character-hint h4 {
+            color: #FFD700;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .character-hint p {
+            color: #FFF;
+            font-size: 1em;
+        }
+
+        .winner-announcement {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .winner-popup {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            border: 5px solid #FFF;
+            box-shadow: 0 0 50px rgba(255,215,0,0.8);
+        }
+
+        .winner-popup h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .winner-popup p {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .character-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hud {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .action-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- INTRO SCREEN -->
+    <div class="game-container" id="introScreen">
+        <div class="title">
+            <h1>⚔️ Finesse Battle ⚔️</h1>
+            <p>Choose your champion and battle!</p>
+        </div>
+
+        <div class="story-intro">
+            <div class="story-text">
+                <p>In the splendour of the Neapolitan court, all seems well… yet rumours stir. The King gathers coins to win respect, but each coin he takes leaves his people hungry. The Knight seeks the King's favour, collecting swords while braving the perils of the woods. The Fante stands with the crowd, drinking from the cups, but shunning the cursed coins.</p>
+                
+                <p>The cards are drawn. You know not your foe—only his score. One attacks, one defends. Choose your role: King, Knight, or Fante. Reach one hundred points, and let the whispers of the court decide your fate.</p>
+            </div>
+        </div>
+
+        <div class="character-selection" id="characterSelection">
+            <div class="player-section">
+                <h2>🎭 Choose Your Secret Role</h2>
+                <p style="color: #FFD700; margin-bottom: 20px;">Your opponent will not know your choice!</p>
+                <div class="character-options">
+                    <div class="character-card" data-character="king">
+                        <img src="king.jpg" alt="King">
+                        <div class="name">King</div>
+                    </div>
+                    <div class="character-card" data-character="knight">
+                        <img src="knight.jpg" alt="Knight">
+                        <div class="name">Knight</div>
+                    </div>
+                    <div class="character-card" data-character="fante">
+                        <img src="fante.jpg" alt="Fante">
+                        <div class="name">Fante</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="start-game-btn" id="startGameBtn" onclick="startGame()">⚔️ ENTER THE COURT ⚔️</button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div class="game-screen" id="gameScreen">
+        <div class="hud">
+            <div class="score-display">
+                <h3>Your Score</h3>
+                <div class="score-value" id="yourScore">0</div>
+            </div>
+            <div class="score-display">
+                <h3>Enemy Score</h3>
+                <div class="score-value" id="enemyScore">0</div>
+            </div>
+        </div>
+
+        <div class="turn-indicator" id="turnIndicator">
+            <h2 id="turnTitle">Your Turn</h2>
+            <p id="turnDescription">Choose a suit to rain down on your enemy!</p>
+        </div>
+
+        <div class="character-hint" id="characterHint">
+            <h4 id="hintTitle">You are the King</h4>
+            <p id="hintText">Collect coins, avoid all else!</p>
+        </div>
+
+        <div class="action-buttons" id="actionButtons">
+            <div class="suit-button" onclick="spawnSuits('cups')">
+                <img src="cups.jpeg" alt="Cups">
+            </div>
+            <div class="suit-button" onclick="spawnSuits('coins')">
+                <img src="coins.jpeg" alt="Coins">
+            </div>
+            <div class="suit-button" onclick="spawnSuits('swords')">
+                <img src="swords.jpeg" alt="Swords">
+            </div>
+            <div class="suit-button" onclick="spawnSuits('woods')">
+                <img src="woods.jpeg" alt="Woods">
+            </div>
+        </div>
+    </div>
+
+    <div class="winner-announcement" id="winnerAnnouncement">
+        <div class="winner-popup">
+            <h2 id="winnerText">🏆 Victory! 🏆</h2>
+            <p id="winnerMessage">The court whispers your name!</p>
+            <button class="start-game-btn" onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            myCharacter: null,
+            myScore: 0,
+            enemyScore: 0,
+            isMyTurn: true,
+            gameActive: false,
+            fallingSuits: [],
+            turnTimer: null
+        };
+
+        const characterNeeds = {
+            'king': 'coins',
+            'knight': 'swords', 
+            'fante': 'cups'
+        };
+
+        const characterHints = {
+            'king': { title: 'You are the King', text: 'Collect coins, avoid all else!' },
+            'knight': { title: 'You are the Knight', text: 'Collect swords, avoid all else!' },
+            'fante': { title: 'You are the Fante', text: 'Collect cups, avoid all else!' }
+        };
+
+        // Character selection logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const characterCards = document.querySelectorAll('.character-card');
+            
+            characterCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const character = this.dataset.character;
+                    
+                    // Remove selection from all cards
+                    document.querySelectorAll('.character-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    
+                    // Add selection to clicked card
+                    this.classList.add('selected');
+                    
+                    // Update game state
+                    gameState.myCharacter = character;
+                    
+                    // Show start button
+                    document.getElementById('startGameBtn').style.display = 'block';
+                });
+            });
+
+            // Add click handlers for falling suits
+            document.addEventListener('click', handleSuitClick);
+        });
+
+        function startGame() {
+            if (!gameState.myCharacter) return;
+            
+            // Hide intro screen
+            document.getElementById('introScreen').style.display = 'none';
+            
+            // Show game screen
+            document.getElementById('gameScreen').style.display = 'block';
+            
+            // Set up character hint
+            const hint = characterHints[gameState.myCharacter];
+            document.getElementById('hintTitle').textContent = hint.title;
+            document.getElementById('hintText').textContent = hint.text;
+            
+            // Start the game
+            gameState.gameActive = true;
+            gameState.isMyTurn = true;
+            updateGameDisplay();
+        }
+
+        function updateGameDisplay() {
+            // Update scores
+            document.getElementById('yourScore').textContent = gameState.myScore;
+            document.getElementById('enemyScore').textContent = gameState.enemyScore;
+            
+            // Update turn indicator
+            if (gameState.isMyTurn) {
+                document.getElementById('turnTitle').textContent = 'Your Turn';
+                document.getElementById('turnDescription').textContent = 'Choose a suit to rain down on your enemy!';
+                document.getElementById('actionButtons').style.display = 'flex';
+            } else {
+                document.getElementById('turnTitle').textContent = 'Enemy\'s Turn';
+                document.getElementById('turnDescription').textContent = 'Catch the suits you need and avoid the rest!';
+                document.getElementById('actionButtons').style.display = 'none';
+                
+                // Simulate enemy attack after a delay
+                setTimeout(() => {
+                    simulateEnemyAttack();
+                }, 1000 + Math.random() * 2000); // 1-3 second delay
+            }
+        }
+
+        function spawnSuits(suitType) {
+            if (!gameState.isMyTurn || !gameState.gameActive) return;
+            
+            // Hide action buttons during attack
+            document.getElementById('actionButtons').style.display = 'none';
+            
+            // Spawn 8-12 suits randomly across the screen
+            const suitCount = 8 + Math.floor(Math.random() * 5);
+            
+            for (let i = 0; i < suitCount; i++) {
+                setTimeout(() => {
+                    createFallingSuit(suitType);
+                }, i * 200 + Math.random() * 500);
+            }
+            
+            // End turn after suits finish falling
+            setTimeout(() => {
+                gameState.isMyTurn = false;
+                updateGameDisplay();
+            }, 4000);
+        }
+
+        function simulateEnemyAttack() {
+            if (gameState.isMyTurn || !gameState.gameActive) return;
+            
+            // Randomly choose a suit for enemy to spawn
+            const suits = ['cups', 'coins', 'swords', 'woods'];
+            const randomSuit = suits[Math.floor(Math.random() * suits.length)];
+            
+            // Spawn suits for the player to catch/avoid
+            const suitCount = 8 + Math.floor(Math.random() * 5);
+            
+            for (let i = 0; i < suitCount; i++) {
+                setTimeout(() => {
+                    createFallingSuit(randomSuit);
+                }, i * 200 + Math.random() * 500);
+            }
+            
+            // End turn after suits finish falling
+            setTimeout(() => {
+                gameState.isMyTurn = true;
+                updateGameDisplay();
+                
+                // Simulate enemy scoring
+                simulateEnemyScoring();
+            }, 4000);
+        }
+
+        function createFallingSuit(suitType) {
+            const suit = document.createElement('div');
+            suit.className = 'falling-suit';
+            suit.dataset.suit = suitType;
+            
+            const img = document.createElement('img');
+            img.src = `${suitType}.jpeg`;
+            img.alt = suitType;
+            suit.appendChild(img);
+            
+            // Random starting position at top of screen
+            const startX = Math.random() * (window.innerWidth - 60);
+            suit.style.left = startX + 'px';
+            suit.style.top = '-60px';
+            
+            document.getElementById('gameScreen').appendChild(suit);
+            gameState.fallingSuits.push(suit);
+            
+            // Animate falling
+            animateFallingSuit(suit);
+        }
+
+        function animateFallingSuit(suit) {
+            let posY = -60;
+            const fallSpeed = 2 + Math.random() * 3; // Random fall speed
+            const sway = Math.sin(Date.now() * 0.001) * 50; // Slight horizontal sway
+            
+            const animation = setInterval(() => {
+                posY += fallSpeed;
+                suit.style.top = posY + 'px';
+                suit.style.left = (parseFloat(suit.style.left) + Math.sin(posY * 0.01) * 0.5) + 'px';
+                
+                // Remove suit when it falls off screen
+                if (posY > window.innerHeight) {
+                    clearInterval(animation);
+                    removeFallingSuit(suit);
+                }
+            }, 16); // ~60fps
+        }
+
+        function handleSuitClick(event) {
+            if (event.target.closest('.falling-suit')) {
+                const suit = event.target.closest('.falling-suit');
+                const suitType = suit.dataset.suit;
+                const neededSuit = characterNeeds[gameState.myCharacter];
+                
+                // Check if this is the right suit for the player's character
+                if (suitType === neededSuit) {
+                    // Correct suit - gain points
+                    gameState.myScore += 10;
+                    suit.style.border = '3px solid #00FF00';
+                    suit.style.transform = 'scale(1.3)';
+                } else {
+                    // Wrong suit - lose points
+                    gameState.myScore = Math.max(0, gameState.myScore - 10);
+                    suit.style.border = '3px solid #FF0000';
+                    suit.style.transform = 'scale(0.8)';
+                }
+                
+                // Remove suit after visual feedback
+                setTimeout(() => {
+                    removeFallingSuit(suit);
+                }, 300);
+                
+                // Update display
+                updateGameDisplay();
+                
+                // Check for winner
+                if (gameState.myScore >= 100) {
+                    endGame('you');
+                }
+            }
+        }
+
+        function removeFallingSuit(suit) {
+            const index = gameState.fallingSuits.indexOf(suit);
+            if (index > -1) {
+                gameState.fallingSuits.splice(index, 1);
+            }
+            if (suit.parentNode) {
+                suit.parentNode.removeChild(suit);
+            }
+        }
+
+        function simulateEnemyScoring() {
+            // Simulate enemy getting some points (but less predictable)
+            const pointsGained = Math.floor(Math.random() * 40) - 10; // -10 to +30 points
+            gameState.enemyScore = Math.max(0, gameState.enemyScore + pointsGained);
+            
+            updateGameDisplay();
+            
+            // Check for enemy winner
+            if (gameState.enemyScore >= 100) {
+                endGame('enemy');
+            }
+        }
+
+        function endGame(winner) {
+            gameState.gameActive = false;
+            
+            // Clear all falling suits
+            gameState.fallingSuits.forEach(suit => {
+                if (suit.parentNode) {
+                    suit.parentNode.removeChild(suit);
+                }
+            });
+            gameState.fallingSuits = [];
+            
+            // Show winner announcement
+            if (winner === 'you') {
+                document.getElementById('winnerText').textContent = '🏆 Victory! 🏆';
+                document.getElementById('winnerMessage').textContent = 'The court whispers your name in triumph!';
+            } else {
+                document.getElementById('winnerText').textContent = '💀 Defeat! 💀';
+                document.getElementById('winnerMessage').textContent = 'Your rival claims the throne...';
+            }
+            
+            document.getElementById('winnerAnnouncement').style.display = 'flex';
+        }
+
+        function resetGame() {
+            // Reset game state
+            gameState = {
+                myCharacter: null,
+                myScore: 0,
+                enemyScore: 0,
+                isMyTurn: true,
+                gameActive: false,
+                fallingSuits: [],
+                turnTimer: null
+            };
+            
+            // Clear all falling suits
+            document.querySelectorAll('.falling-suit').forEach(suit => {
+                if (suit.parentNode) {
+                    suit.parentNode.removeChild(suit);
+                }
+            });
+            
+            // Hide game screen and winner announcement
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('winnerAnnouncement').style.display = 'none';
+            
+            // Show intro screen
+            document.getElementById('introScreen').style.display = 'flex';
+            
+            // Clear character selections
+            document.querySelectorAll('.character-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Hide start button
+            document.getElementById('startGameBtn').style.display = 'none';
+        }
+
+        // Keyboard controls for enhanced gameplay
+        document.addEventListener('keydown', function(event) {
+            if (!gameState.gameActive) return;
+            
+            // Number keys 1-4 for suit selection during your turn
+            if (gameState.isMyTurn) {
+                switch(event.key) {
+                    case '1':
+                        spawnSuits('cups');
+                        break;
+                    case '2':
+                        spawnSuits('coins');
+                        break;
+                    case '3':
+                        spawnSuits('swords');
+                        break;
+                    case '4':
+                        spawnSuits('woods');
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
